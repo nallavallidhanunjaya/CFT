@@ -55,7 +55,7 @@
             "Properties":{
                 "FunctionName": "S3TriggeredLambdaFunction",
                 "Runtime": "python3.12",
-                "Handler": "lambda_function.lambda_handler",
+                "Handler": "my-lambda-code.lambda_handler",
                 "Code": {
                     "S3Bucket": "my-bucket-for-lambda-1", 
                     "S3Key": "my-lambda-code.zip" 
@@ -79,7 +79,20 @@
         "S3Bucket": {
             "Type": "AWS::S3::Bucket",
             "Properties": {
-              "BucketName": "dhanu-bucket-1234"
+              "BucketName": "dhanu-bucket-1234",
+              "NotificationConfiguration": {
+                "LambdaConfigurations": [
+                    {
+                        "Event": "s3:ObjectCreated:*",
+                        "Function": {
+                            "Fn::GetAtt": [
+                                "S3TriggeredLambda",
+                                "Arn"
+                            ]
+                        }
+                    }
+                ]
+            }
             }
           },
         "LambdaPermissionForS3": {
@@ -94,26 +107,6 @@
                     "Fn::Sub": "arn:aws:s3:::${S3Bucket}"
                 }
             }
-        },
-        "S3BucketNotification": {
-            "Type": "AWS::S3::Bucket",
-            "Properties": {
-                "BucketName": "my-bucket-for-lambda-1",
-                "NotificationConfiguration": {
-                    "LambdaConfigurations": [
-                        {
-                            "Event": "s3:ObjectCreated:*",
-                            "Function": {
-                                "Fn::GetAtt": [
-                                    "S3TriggeredLambda",
-                                    "Arn"
-                                ]
-                            }
-                        }
-                    ]
-                }
-            },
-            "DependsOn": "LambdaPermissionForS3"
         }
     }
 }
